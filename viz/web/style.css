@@ -1,3 +1,7 @@
+* {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+}
 .input .inputbox {
   border-radius: 5px;
   border: 2px solid #eee;
@@ -5,7 +9,6 @@
   font-size: 20px;
   width: 100%;
   outline: none;
-  margin-right: 1%;
 }
 
 .input .inputbox:focus {
@@ -20,9 +23,32 @@
 .container {
   width: 80%;
   margin: auto;
+  overflow-x: auto;
 }
 
+table.flex {
+  display: flex;
+}
+.flex-col {
+  display: inline-flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
 
+th,
+td {
+  padding: 5px;
+  text-align: left;
+  background-blend-mode: multiply;
+  mix-blend-mode: multiply;
+}
+tr:nth-child(2n) {
+  background: #fafafa;
+}
+tr:nth-child(2n+1) {
+  background: #efefef;
+}
 
 ::-webkit-scrollbar {
   width: 12px;
