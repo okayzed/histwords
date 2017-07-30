@@ -60,18 +60,21 @@ def clear_embed_cache():
     global EMBED_CACHE
     EMBED_CACHE = {}
 
+import threading
+embed_lock = threading.Lock()
 def load_embeddings(filename="embeddings/eng-all_sgns"):
-    print "LOADING EMBEDDINGS %s" % filename
-    start = time.time()
+    with embed_lock:
+        print "LOADING EMBEDDINGS %s" % filename
+        start = time.time()
 
-    if filename in EMBED_CACHE:
-        return EMBED_CACHE[filename]
+        if filename in EMBED_CACHE:
+            return EMBED_CACHE[filename]
 
-    embeddings = SequentialEmbedding.load(filename, range(1840, 2000, 10))
-    print "LOAD EMBEDDINGS TOOK %s" % (time.time() - start)
+        embeddings = SequentialEmbedding.load(filename, range(1840, 2000, 10))
+        print "LOAD EMBEDDINGS TOOK %s" % (time.time() - start)
 
-    EMBED_CACHE[filename] = embeddings
-    return embeddings
+        EMBED_CACHE[filename] = embeddings
+        return embeddings
 
 def clear_figure():
     plt.figure(figsize=(20,20))
