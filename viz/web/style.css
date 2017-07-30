@@ -2,7 +2,7 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   box-sizing: border-box;
 }
-.input .inputbox {
+.header .inputbox {
   border-radius: 5px;
   border: 2px solid #eee;
   padding: 5px;
@@ -11,19 +11,27 @@
   outline: none;
 }
 
-.input .inputbox:focus {
+.header .inputbox:focus {
   border: 2px solid #ccc;
 }
 
-.input {
-  padding: 0px;
+.header {
+  padding: 10px 10%;
   margin: 0px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  background: rgba(255,255,255,.95);
 }
 
 .container {
   width: 80%;
+  padding-top: 120px;
   margin: auto;
   overflow-x: auto;
+  position: relative;
 }
 
 table.flex {
@@ -42,12 +50,27 @@ td {
   text-align: left;
   background-blend-mode: multiply;
   mix-blend-mode: multiply;
+  font-weight: 400;
+}
+th {
+  font-weight: 500;
 }
 tr:nth-child(2n) {
   background: #fafafa;
 }
 tr:nth-child(2n+1) {
   background: #efefef;
+}
+td.compare {
+  background: #DE96BD !important;
+}
+td.selected {
+  background: #98DE96 !important;
+}
+td span.similarity {
+  font-size: .75em;
+  font-weight: 200;
+  color: rgba(0,0,0,.5);
 }
 
 ::-webkit-scrollbar {

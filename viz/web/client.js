@@ -1,10 +1,25 @@
 (function() {
+  var wordSettings = {
+    frozenWord: null,
+    freezeHighlight: false
+  }
   function submitTextarea() {
-    var textEl = $(".input .inputbox");
+    var textEl = $(".header .inputbox");
     var promise = submitMessage(textEl.val(), function(data, res) {
       console.log("LOADED DATA!", data);
-      $("#search_term").text(`You searched for ${data.term}!`).show();
+      $("#search_term").text(`You searched for ${data.term}...`).show();
       makeMatrixByYear(data.results);
+      // highlight words on hover
+      $("table#matrix_by_year").find("td").on("mouseenter", function() {
+        highlightDrift($(this).attr("data-word"), "compare");
+      });
+      $("table#matrix_by_year").find("td").on("mouseleave", function() {
+        unhighlightDrift($(this).attr("data-word"), "compare");
+      });
+      // freeze highlight on click
+      $("table#matrix_by_year").find("td").on("click", function() {
+        freezeHighlightDrift($(this).attr("data-word"));
+      });
     });
 
     promise.fail(function() {
@@ -29,10 +44,11 @@
       $thisTable.append("<tr class=\"flex-col\" id=\"year_" + year + "\"></tr>");
       $thisTable.find("#year_" +year+ "").append("<th>" + year + "</th>");
       for (var i = 0; i < arrWords.length; i++) {
-        var similarity = Math.floor(arrWords[i]["similarity"] * 100);
+        var similarity = Math.ceil(arrWords[i]["similarity"] * 100);
         $thisTable.find("#year_" + year + "")
-          .append("<td style=\"background-color: rgba(64,188,216, " + similarity / 100 + ")\">" +
-            arrWords[i]["word"] + "<br/>" + similarity + "%</td>");
+          .append("<td data-word=\"cell-" + arrWords[i]["word"] + "\"" + 
+            "style=\"background-color: rgba(64,188,216, " + similarity / 100 + ")\">" +
+            arrWords[i]["word"] + "<br/><span class=\"similarity\">" + similarity + "%</span></td>");
       }
     }
     $thisTable.show();
@@ -40,7 +56,7 @@
 
   function submitMessage(msg, cb) {
     // get the room we are in
-    return getCmd("search", { term: msg}, cb);
+    return getCmd("search", { term: msg }, cb);
   }
 
   function newLoading() {
@@ -93,8 +109,34 @@
     }
   }
 
+  // Hover over word to highlight drift
+  function highlightDrift(word, wordClass) {
+    // highlght words with matching data-word attr
+    $("table#matrix_by_year").find("td[data-word=\"" + word + "\"]").addClass(wordClass);
+  }
+  function unhighlightDrift(word, wordClass) {
+    $("table#matrix_by_year").find("td[data-word=\"" + word + "\"]").removeClass(wordClass);
+  }
+  function freezeHighlightDrift(word) {
+    if (wordSettings.freezeHighlight) {
+      if (word === wordSettings.frozenWord) {
+        wordSettings.freezeHighlight = false;
+        wordSettings.frozenWord = null;
+        unhighlightDrift(word, "selected");
+      } else {
+        unhighlightDrift(wordSettings.frozenWord, "selected");
+        wordSettings.frozenWord = word;
+        highlightDrift(word, "selected");
+      }
+    } else {
+      wordSettings.freezeHighlight = true;
+      highlightDrift(word, "selected");
+      wordSettings.frozenWord = word;
+    }
+  }
+
   $(function() {
-    $(".input .inputbox").on("keydown", handleKeyDown);
+    $(".header .inputbox").on("keydown", handleKeyDown);
   });
 
 })();
