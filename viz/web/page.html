@@ -14,9 +14,20 @@
     <div class="container clearfix">
       <div class="header">
         <input class='inputbox' type="text" placeholder="enter a term to explore"></input>
+        <div class='loadingtray'> </div>
         <h2 id="search_term" style="display:none;">You searched for <span></span></h2>
+
+        
+        <div class="viewtab_box">
+          view as: 
+          <div class="viewtab active table_view">table</div>
+          <div class="viewtab spatial_view">spatial</div>
+          <div class="viewtab line_view">line</div>
+        </div>
       </div>
-      <div>
+
+
+      <div class="results">
         <table class="flex" id="matrix_by_year" style="display:none;">
         </table>
       </div>

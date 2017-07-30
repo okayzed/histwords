@@ -1,7 +1,21 @@
+/* SCROLLBAR RESET */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ddd;
+}
+
+
 * {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   box-sizing: border-box;
 }
+
+
+
+/* HEADER (OBVIOUSLY) */
 .header .inputbox {
   border-radius: 5px;
   border: 2px solid #eee;
@@ -30,10 +44,9 @@
   width: 80%;
   padding-top: 120px;
   margin: auto;
-  overflow-x: auto;
-  position: relative;
 }
 
+/* TABLE CSS NEEDS TO BE SCOPED AND CLEANED UP */
 table.flex {
   display: flex;
 }
@@ -55,6 +68,12 @@ td {
 th {
   font-weight: 500;
 }
+
+td {
+  cursor: pointer;
+
+}
+
 tr:nth-child(2n) {
   background: #fafafa;
 }
@@ -73,23 +92,24 @@ td span.similarity {
   color: rgba(0,0,0,.5);
 }
 
-::-webkit-scrollbar {
-  width: 12px;
+/* VIEW TABS */
+
+.viewtab_box {
+  font-size: 20px;
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: #ddd;
+.viewtab {
+  display: inline-block;
+  cursor: pointer;
+  padding: 5px;
+  margin-top: 5px;
 }
 
-@-moz-document url-prefix() { 
-  .content table {
-    margin-bottom: 100px;
-  }
-
-  .container-fluid .mynick {
-    height: 70px;
-
-  }
+.viewtab:hover {
+  border-bottom: 2px solid lightgray;
 }
 
+.viewtab.active {
+  border-bottom: 2px solid gray;
+}
 
