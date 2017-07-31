@@ -100,6 +100,7 @@
         .style("font-size", function(d) { return parseInt(d.similarity * 30, 10) + "px";})
         .style("left", function(d) { return (d.position.x * 50 + 1000)+ "px"; })
         .style("top", function(d) { return (d.position.y * 50 + 650) + "px"; })
+        .style("color", "#559955")
         .style("opacity", function(d) { return (d.year - 1800) / 100 - 0.2; })
         .text(function(d) { return d.word; })
 
