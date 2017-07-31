@@ -98,6 +98,7 @@
       .append("div")
         .style("position", "absolute")
         .style("font-size", function(d) { return parseInt(d.similarity * 30, 10) + "px";})
+        .style("cursor", "pointer")
         .style("left", function(d) { return (d.position.x * 50 + 1000)+ "px"; })
         .style("top", function(d) { return (d.position.y * 50 + 650) + "px"; })
         .style("color", "#559955")
@@ -178,9 +179,8 @@
   // }}}
 
   // {{{ text area handler
-  function submitTextarea() {
+  function searchTerm(word) {
     var textEl = $(".header .inputbox");
-    var word = textEl.val();
 
     textEl.attr("disabled", true);
     textEl.attr("placeholder", "searching for: " + word);
@@ -199,6 +199,29 @@
 
     textEl.val("");
   }
+
+  function addBreadcrumb(word) {
+    var breadCrumbEl = $("#breadcrumb_"+word);
+    if (!breadCrumbEl.length) {
+      breadCrumbEl = $("<div />");
+      breadCrumbEl.addClass("breadcrumb");
+      breadCrumbEl.attr("id", "breadcrumb_" + word);
+      breadCrumbEl.text(word);
+      $(".breadcrumbs").prepend(breadCrumbEl);
+      breadCrumbEl.on("click", function() {
+        searchTerm(word);
+      });
+    }
+  }
+
+  function submitTextarea() {
+    var textEl = $(".header .inputbox");
+    var word = textEl.val();
+
+    addBreadcrumb(word);
+    searchTerm(word);
+  }
+
 
   // Gets ready to press enter
   function handleKeyDown(event) {

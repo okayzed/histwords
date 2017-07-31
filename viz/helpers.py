@@ -92,6 +92,13 @@ def fit_tsne(values):
 
     return fitted
 
+
+def get_now():
+    return int(time.time() * 1000)
+
+
+
+# plotting features, not used much any more
 def plot_words(word1, words, fitted, cmap, sims):
     # TODO: remove this and just set the plot axes directly
     plt.scatter(fitted[:,0], fitted[:,1], alpha=0)
@@ -132,7 +139,3 @@ def plot_annotations(annotations):
 
 def savefig(name):
     plt.savefig(name, bbox_inches=0)
-
-
-def get_now():
-    return int(time.time() * 1000)

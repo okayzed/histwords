@@ -41,6 +41,12 @@
   background: rgba(255,255,255,.95);
 }
 
+body {
+  margin: 0px;
+  margin-top: 120px;
+  margin-bottom: 50px;
+}
+
 .container {
   width: 80%;
   padding-top: 120px;
@@ -103,8 +109,8 @@ td span.similarity {
   display: inline-block;
   cursor: pointer;
   padding: 5px;
-  margin-right: 10px;
   margin-top: 5px;
+  border-bottom: 2px solid white;
 }
 
 .viewtab:hover {
@@ -113,4 +119,22 @@ td span.similarity {
 
 .viewtab.active {
   border-bottom: 2px solid gray;
+}
+
+.breadcrumb {
+  display: inline-block;
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  background-color: lightgray;
+}
+
+.breadcrumb:hover {
+  background-color: gray;
+}
+
+.breadcrumb, .viewtab {
+  width: 80px;
+  overflow: hidden;
+  text-align: center;
 }
