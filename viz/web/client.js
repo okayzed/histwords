@@ -104,6 +104,10 @@
     var maxY = getPos('max', 'y');
 
 
+    // TODO: translate the original term into a series of arrow annotations
+    // in the SVG
+
+
     var resultEl = d3.select(".results")
       .append("svg")
       .attr("viewBox", [minX - 25, minY - 25, maxX - minX + 50, maxY - minY + 50].join(" "))
