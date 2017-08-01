@@ -62,7 +62,7 @@ def clear_embed_cache():
 
 import threading
 embed_lock = threading.Lock()
-def load_embeddings(filename="embeddings/eng-all_sgns"):
+def load_embeddings(filename="embeddings/eng-fiction-all_sgns"):
     with embed_lock:
         print "LOADING EMBEDDINGS %s" % filename
         start = time.time()

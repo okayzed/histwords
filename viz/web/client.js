@@ -91,18 +91,34 @@
   // {{{ word cloud plot
   function makeCloudView(data, res) {
     $(".results").empty();
+
+    function getPos(min_or_max, x_or_y) {
+      var val = _[min_or_max](data.results, function(d) { return d.position[x_or_y];});
+      return parseInt(val.position[x_or_y] * 10, 10);
+    }
+
+    // normalize the results positions...
+    var minX = getPos('min', 'x');
+    var maxX = getPos('max', 'x');
+    var minY = getPos('min', 'y');
+    var maxY = getPos('max', 'y');
+
+
     var resultEl = d3.select(".results")
-      .selectAll("div")
+      .append("svg")
+      .attr("viewBox", [minX - 25, minY - 25, maxX - minX + 50, maxY - minY + 50].join(" "))
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .selectAll("text")
       .data(data.results)
       .enter()
-      .append("div")
-        .style("position", "absolute")
-        .style("font-size", function(d) { return parseInt(d.similarity * 30, 10) + "px";})
+      .append("text")
+        .style("font-size", function(d) { return parseInt(d.similarity * 10, 10) + "px";})
         .style("cursor", "pointer")
-        .style("left", function(d) { return (d.position.x * 50 + 1000)+ "px"; })
-        .style("top", function(d) { return (d.position.y * 50 + 650) + "px"; })
-        .style("color", "#559955")
-        .style("opacity", function(d) { return (d.year - 1800) / 100 - 0.2; })
+        .attr("x", function(d) { return d.position.x * 10; })
+        .attr("y", function(d) { return d.position.y * 10; })
+        .attr("fill", "#559955")
+        .style("opacity", function(d) { return Math.max(0.1, (d.year - 1800) / 200); })
         .text(function(d) { return d.word; })
 
   }
