@@ -92,9 +92,26 @@
   function makeCloudView(data, res) {
     $(".results").empty();
 
+    var results = _.filter(data.results, function(d) { return d.word != data.term;} );
+    var annotations = _.filter(data.results, function(d) { return d.word == data.term; } );
+    annotations = _.sortBy(annotations, function(d) { return d.year; } );
+    var ann_lines = [];
+
+    var prevAnn;
+    _.each(annotations, function(ann) {
+      if (prevAnn) {
+        ann_lines.push([prevAnn.position.x, prevAnn.position.y, ann.position.x, ann.position.y ]);
+      }
+      prevAnn = ann;
+    });
+
+
+
+    var scaleFactor = 10;
+
     function getPos(min_or_max, x_or_y) {
-      var val = _[min_or_max](data.results, function(d) { return d.position[x_or_y];});
-      return parseInt(val.position[x_or_y] * 10, 10);
+      var val = _[min_or_max](results, function(d) { return d.position[x_or_y];});
+      return parseInt(val.position[x_or_y] * scaleFactor, 10);
     }
 
     // normalize the results positions...
@@ -103,27 +120,47 @@
     var minY = getPos('min', 'y');
     var maxY = getPos('max', 'y');
 
-
-    // TODO: translate the original term into a series of arrow annotations
-    // in the SVG
-
-
     var resultEl = d3.select(".results")
       .append("svg")
       .attr("viewBox", [minX - 25, minY - 25, maxX - minX + 50, maxY - minY + 50].join(" "))
       .attr("width", "100%")
-      .attr("height", "100%")
-      .selectAll("text")
-      .data(data.results)
+      .attr("height", "100%");
+
+    resultEl
+      .selectAll("text.term")
+      .data(results)
       .enter()
       .append("text")
-        .style("font-size", function(d) { return parseInt(d.similarity * 10, 10) + "px";})
+        .style("font-size", function(d) { return parseInt(d.similarity * scaleFactor, 10) + "px";})
         .style("cursor", "pointer")
-        .attr("x", function(d) { return d.position.x * 10; })
-        .attr("y", function(d) { return d.position.y * 10; })
+        .attr("x", function(d) { return d.position.x * scaleFactor; })
+        .attr("y", function(d) { return d.position.y * scaleFactor; })
         .attr("fill", "#559955")
         .style("opacity", function(d) { return Math.max(0.1, (d.year - 1800) / 200); })
-        .text(function(d) { return d.word; })
+        .text(function(d) { return d.word; });
+
+    resultEl
+      .selectAll("line.annotation")
+      .data(ann_lines)
+      .enter()
+      .append("line")
+        .style("stroke", "#666")
+        .style("stroke-width", "0.5px")
+        .attr("x1", function(d) { return d[0] * scaleFactor; })
+        .attr("y1", function(d) { return d[1] * scaleFactor; })
+        .attr("x2", function(d) { return d[2] * scaleFactor; })
+        .attr("y2", function(d) { return d[3] * scaleFactor; });
+
+    resultEl
+      .selectAll("text.annotation")
+      .data(annotations)
+      .enter()
+      .append("text")
+        .style("font-size", "3px")
+        .style("cursor", "pointer")
+        .attr("x", function(d) { return d.position.x * scaleFactor + 1; })
+        .attr("y", function(d) { return d.position.y * scaleFactor + 1; })
+        .text(function(d) { return d.year; });
 
   }
 

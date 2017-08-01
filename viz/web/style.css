@@ -103,6 +103,7 @@ td span.similarity {
 
 .viewtab_box {
   font-size: 20px;
+  float: left;
 }
 
 .viewtab {
@@ -124,7 +125,7 @@ td span.similarity {
 .breadcrumb {
   display: inline-block;
   padding: 10px;
-  margin-top: 10px;
+  margin-top: 5px;
   cursor: pointer;
   background-color: lightgray;
 }
