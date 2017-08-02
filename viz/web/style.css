@@ -134,6 +134,11 @@ td span.similarity {
   background-color: gray;
 }
 
+.breadcrumb.active {
+  background-color: darkgray;
+
+}
+
 .breadcrumb, .viewtab {
   width: 80px;
   overflow: hidden;

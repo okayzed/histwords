@@ -215,7 +215,7 @@
   }
   // }}} server comm
 
-  // {{{
+  // {{{ vis picker
   var VIZ = {
     "table" : makeTableView,
     "cloud" : makeCloudView,
@@ -225,6 +225,10 @@
   function visualizeResults(data, res) {
     DATA = data;
     RES = res;
+
+    // highlight the term from data
+    $(".breadcrumb").removeClass("active");
+    $("#breadcrumb_" + data.term).addClass("active");
 
     drawVisuals();
   }
