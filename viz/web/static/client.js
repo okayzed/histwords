@@ -130,8 +130,8 @@
   var scale = d3.schemeCategory20;
   function getColor(term) {
     if (getColor.colors[term] == null) {
-      getColor.idx++;
       getColor.colors[term] = scale[getColor.idx % scale.length];
+      getColor.idx++;
     }
 
 
@@ -321,6 +321,8 @@
 
   function drawVisuals() {
     var visualize = VIZ[SELECTED_VIEW];
+    getColor.idx = 0;
+    getColor.colors = {};
     visualize(DATA, RES);
   }
   // }}}
