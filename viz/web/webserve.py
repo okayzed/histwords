@@ -63,7 +63,7 @@ def restart():
     start()
 
 
-if __name__ == '__main__':
+def main():
     t = start()
     import helpers
     helpers.load_embeddings()
@@ -74,3 +74,7 @@ if __name__ == '__main__':
         if not t.isAlive():
             print "WEBSERVER DIED, EXITING"
             break
+
+if __name__ == '__main__':
+    main()
+
