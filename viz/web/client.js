@@ -30,7 +30,7 @@
   }
 
   function makeMatrixByYear(data) {
-    var dataByYear = _.groupBy(data, "year");
+
     var resultEl = $(".results");
     resultEl.empty();
 
@@ -40,6 +40,7 @@
 
     resultEl.append($thisTable);
 
+    var dataByYear = _.groupBy(data, "year");
     for (var year in dataByYear) {
       var arrWords = _.sortBy(dataByYear[year], "similarity").reverse();
       $thisTable.append("<tr class=\"flex-col\" id=\"year_" + year + "\"></tr>");
@@ -89,20 +90,39 @@
   // }}} TABLE VIEW
 
   // {{{ word cloud plot
+  var scale = d3.schemeCategory10;
+  function getColor(term) {
+    if (getColor.colors[term] == null) {
+      getColor.idx++;
+      getColor.colors[term] = scale[getColor.idx % 20];
+    }
+
+    return getColor.colors[term];
+  }
+  getColor.colors = {}
+  getColor.idx = 0;
+
   function makeCloudView(data, res) {
     $(".results").empty();
 
-    var results = _.filter(data.results, function(d) { return d.word != data.term;} );
-    var annotations = _.filter(data.results, function(d) { return d.word == data.term; } );
+    var results = _.filter(data.results, function(d) { return !d.query.includes(d.word) ; } );
+    var annotations = _.filter(data.results, function(d) { return d.query.includes(d.word) ; } );
     annotations = _.sortBy(annotations, function(d) { return d.year; } );
-    var ann_lines = [];
 
-    var prevAnn;
-    _.each(annotations, function(ann) {
-      if (prevAnn) {
-        ann_lines.push([prevAnn.position.x, prevAnn.position.y, ann.position.x, ann.position.y ]);
-      }
-      prevAnn = ann;
+    var groupedAnns = _.groupBy(annotations, function(d) { return d.word; });
+
+    var ann_lines = {}
+    _.each(groupedAnns, function(annotations, group) {
+      var ann_line = [];
+      var prevAnn;
+      _.each(annotations, function(ann) {
+        if (prevAnn) {
+          ann_line.push([prevAnn.position.x, prevAnn.position.y, ann.position.x, ann.position.y ]);
+        }
+        prevAnn = ann;
+      });
+
+      ann_lines[group] = ann_line;
     });
 
 
@@ -135,21 +155,28 @@
         .style("cursor", "pointer")
         .attr("x", function(d) { return d.position.x * scaleFactor; })
         .attr("y", function(d) { return d.position.y * scaleFactor; })
-        .attr("fill", "#559955")
+        .attr("fill", function(d) { return getColor(d.query); })
         .style("opacity", function(d) { return Math.max(0.1, (d.year - 1800) / 200); })
-        .text(function(d) { return d.word; });
+        .text(function(d) { return d.word; })
+        .append("title")
+          .text(function(d) { return d.query + " " + d.year });
 
-    resultEl
-      .selectAll("line.annotation")
-      .data(ann_lines)
-      .enter()
-      .append("line")
-        .style("stroke", "#666")
-        .style("stroke-width", "0.5px")
-        .attr("x1", function(d) { return d[0] * scaleFactor; })
-        .attr("y1", function(d) { return d[1] * scaleFactor; })
-        .attr("x2", function(d) { return d[2] * scaleFactor; })
-        .attr("y2", function(d) { return d[3] * scaleFactor; });
+    _.each(ann_lines, function(ann_line, group) {
+      resultEl
+        .selectAll("line.annotation")
+        .data(ann_line)
+        .enter()
+        .append("line")
+          .style("stroke", getColor(group))
+          .style("stroke-width", "1.5px")
+          .style("opacity", 0.3)
+          .attr("x1", function(d) { return d[0] * scaleFactor; })
+          .attr("y1", function(d) { return d[1] * scaleFactor; })
+          .attr("x2", function(d) { return d[2] * scaleFactor; })
+          .attr("y2", function(d) { return d[3] * scaleFactor; })
+          .append("title")
+            .text(group);
+    });
 
     resultEl
       .selectAll("text.annotation")
@@ -222,13 +249,17 @@
     "json" : makeJsonView
   };
 
+  function getCrumb(term) {
+    return term.replace(/:/g, "_");
+  }
+
   function visualizeResults(data, res) {
     DATA = data;
     RES = res;
 
     // highlight the term from data
     $(".breadcrumb").removeClass("active");
-    $("#breadcrumb_" + data.term).addClass("active");
+    $("#breadcrumb_" + getCrumb(data.term)).addClass("active");
 
     drawVisuals();
   }
@@ -266,7 +297,7 @@
     if (!breadCrumbEl.length) {
       breadCrumbEl = $("<div />");
       breadCrumbEl.addClass("breadcrumb");
-      breadCrumbEl.attr("id", "breadcrumb_" + word);
+      breadCrumbEl.attr("id", "breadcrumb_" + getCrumb(word));
       breadCrumbEl.text(word);
       $(".breadcrumbs").prepend(breadCrumbEl);
       breadCrumbEl.on("click", function() {

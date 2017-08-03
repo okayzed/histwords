@@ -10,6 +10,8 @@ import mimetypes
 from urlparse import urlparse, parse_qs
 import zlib
 
+from collections import defaultdict
+
 def write_response(handler, code, headers, data=""):
     handler.send_response(200)
     for header in headers:
@@ -59,18 +61,32 @@ STATIC = {
 
 import lru
 search_cache = lru.cache('search', 100)
+term_cache = lru.cache('neighbors', 1000)
 def do_search(word1):
 
     if not word1 in search_cache:
         embeddings = helpers.load_embeddings()
-        time_sims, lookups, nearests, sims = helpers.get_time_sims(embeddings, word1)
+        words = word1.split(":")
+        all_lookups = {}
+        all_sims = {}
+        all_terms = defaultdict(list)
+        for word2 in words:
+            if not word2 in term_cache:
+                term_cache[word2] = helpers.get_time_sims(embeddings, word2)
+            else:
+                print "USING CACHED NEIGHBORS FOR", word2
 
-        words = lookups.keys()
-        values = [ lookups[word] for word in words ]
+            time_sims, lookups, nearests, sims = term_cache[word2]
+
+            for word in lookups:
+                all_terms[word].append(word2)
+
+            all_lookups.update(lookups)
+            all_sims.update(sims)
+
+        words = all_lookups.keys()
+        values = [ all_lookups[word] for word in words ]
         fitted = helpers.fit_tsne(values)
-        if fitted is None or not len(fitted):
-            print "Couldn't model word", word1
-            return { "term" : word1, "error" : "Couldn't model word" }
 
 
         # we should stitch the arrays together into objects, i guess
@@ -80,8 +96,9 @@ def do_search(word1):
             ww, decade = word.split("|")
             obj = {
                 "word" : ww,
+                "query" : all_terms[word],
                 "year" : int(decade),
-                "similarity" : sims[word],
+                "similarity" : all_sims[word],
                 "position" : {
                     "x" : round(fitted[i][0], 3),
                     "y" : round(fitted[i][1], 3)

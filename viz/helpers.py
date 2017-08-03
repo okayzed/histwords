@@ -106,6 +106,7 @@ def plot_words(word1, words, fitted, cmap, sims):
     plt.axis('off')
 
     annotations = []
+    isArray = type(word1) == list
     for i in xrange(len(words)):
         pt = fitted[i] 
 
@@ -115,7 +116,7 @@ def plot_words(word1, words, fitted, cmap, sims):
         sizing = sims[words[i]] * 30
 
         # word1 is the word we are plotting against
-        if ww == word1:
+        if ww == word1 or (isArray and ww in word1):
             annotations.append((ww, decade, pt))
             word = decade
             color = 'black'
