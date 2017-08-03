@@ -5,7 +5,7 @@ import time
 
 
 tpath = os.path.dirname(os.path.realpath(__file__))
-VIZ_DIR=tpath
+VIZ_DIR=os.path.join(tpath, "web")
 
 tpath = os.path.abspath(os.path.join(tpath, "../"))
 ROOT_DIR=tpath

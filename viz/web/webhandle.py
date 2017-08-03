@@ -53,10 +53,10 @@ def get_value(query, key, default=None):
 
 
 STATIC = {
-    "/" : os.path.join(helpers.VIZ_DIR, "web", "page.html"),
-    "/favicon.ico" : os.path.join(helpers.VIZ_DIR, "web", "favicon.ico"),
-    "/web/style.css" : os.path.join(helpers.VIZ_DIR, "web", "style.css"),
-    "/web/client.js" : os.path.join(helpers.VIZ_DIR, "web", "client.js")
+    "/" : os.path.join(helpers.VIZ_DIR, "static", "page.html"),
+    "/favicon.ico" : os.path.join(helpers.VIZ_DIR, "static", "favicon.ico"),
+    "/web/style.css" : os.path.join(helpers.VIZ_DIR, "static", "style.css"),
+    "/web/client.js" : os.path.join(helpers.VIZ_DIR, "static", "client.js")
 }
 
 import lru
@@ -146,7 +146,6 @@ def do_get(handler):
         write_response(handler, 200, ['Content-type: text/json'], json.dumps(msg_dict))
 
 
-# POST LETS US: join, leave, nick change, say messages, write PMs
 def do_post(handler):
     content_len = int(handler.headers.getheader('content-length', 0))
     post_body = handler.rfile.read(content_len)

@@ -47,6 +47,8 @@
       $thisTable.find("#year_" +year+ "").append("<th>" + year + "</th>");
       for (var i = 0; i < arrWords.length; i++) {
         var similarity = Math.ceil(arrWords[i]["similarity"] * 100);
+
+        // TODO: use getColor to pick the background color based on the word's query term
         $thisTable.find("#year_" + year + "")
           .append("<td data-word=\"cell-" + arrWords[i]["word"] + "\"" +
             "style=\"background-color: rgba(64,188,216, " + similarity / 100 + ")\">" +
@@ -293,7 +295,7 @@
   }
 
   function addBreadcrumb(word) {
-    var breadCrumbEl = $("#breadcrumb_"+word);
+    var breadCrumbEl = $("#breadcrumb_"+getCrumb(word));
     if (!breadCrumbEl.length) {
       breadCrumbEl = $("<div />");
       breadCrumbEl.addClass("breadcrumb");
