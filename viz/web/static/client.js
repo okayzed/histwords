@@ -58,7 +58,7 @@
         tdEl.text(word.word);
         tdEl.append("<br />");
         tdEl.append($("<span />").addClass("similarity").text(similarity + "%"));
-        tdEl.attr("title", word.query + " ");
+        tdEl.attr("title", "similar to " + word.query);
         $thisTable.find("#year_" + year + "")
           .append(tdEl);
 
@@ -173,7 +173,7 @@
         .style("opacity", function(d) { return Math.max(0.1, (d.year - 1800) / 200); })
         .text(function(d) { return d.word; })
         .append("title")
-          .text(function(d) { return d.query + " " + d.year });
+          .text(function(d) { return "similar to " + d.query + " " + d.year });
 
     _.each(ann_lines, function(ann_line, group) {
       resultEl
