@@ -45,16 +45,27 @@
       var arrWords = _.sortBy(dataByYear[year], "similarity").reverse();
       $thisTable.append("<tr class=\"flex-col\" id=\"year_" + year + "\"></tr>");
       $thisTable.find("#year_" +year+ "").append("<th>" + year + "</th>");
-      for (var i = 0; i < arrWords.length; i++) {
-        var similarity = Math.ceil(arrWords[i]["similarity"] * 100);
+      _.each(arrWords, function(word) {
+        var similarity = Math.ceil(word.similarity * 100);
+        var wordColor = getColor(word.query);
+        wordColor.opacity = similarity / 100;
 
-        // TODO: use getColor to pick the background color based on the word's query term
+
+        var tdEl = $("<td />");
+        tdEl.attr("data-word", "cell-" + word.word);
+
+        tdEl.css("background-color", wordColor);
+        tdEl.text(word.word);
+        tdEl.append("<br />");
+        tdEl.append($("<span />").addClass("similarity").text(similarity + "%"));
+        tdEl.attr("title", word.query + " ");
         $thisTable.find("#year_" + year + "")
-          .append("<td data-word=\"cell-" + arrWords[i]["word"] + "\"" +
-            "style=\"background-color: rgba(64,188,216, " + similarity / 100 + ")\">" +
-            arrWords[i]["word"] + "<br/><span class=\"similarity\">" + similarity + "%</span></td>");
-      }
+          .append(tdEl);
+
+
+      });
     }
+
     $thisTable.show();
   }
 
@@ -96,10 +107,11 @@
   function getColor(term) {
     if (getColor.colors[term] == null) {
       getColor.idx++;
-      getColor.colors[term] = scale[getColor.idx % 20];
+      getColor.colors[term] = scale[getColor.idx % scale.length];
     }
 
-    return getColor.colors[term];
+
+    return d3.color(getColor.colors[term]);
   }
   getColor.colors = {}
   getColor.idx = 0;
