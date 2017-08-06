@@ -47,25 +47,29 @@
     var dataByYear = _.groupBy(data, 'year');
     for (var year in dataByYear) {
       var arrWords = _.sortBy(dataByYear[year], 'similarity').reverse();
-      $thisTable.append('<tr class=\"flex-col\" id=\"year_' + year + '\"></tr>');
+      $thisTable.append('<tr class=\'flex-col\' id=\'year_' + year + '\'></tr>');
       $thisTable.find('#year_' +year).append('<th>' + year + '</th>');
       _.each(arrWords, function(word) {
-        var similarity = parseInt(word.similarity * 100);
+        var tdEl = $('<td />');
+        tdEl.text(word.word);
+        tdEl.attr('title', 'similar to ' + word.query);
+        tdEl.attr('data-word', 'cell-' + word.word);
+
+        _.each(word.similarity, function(sim, i) {
+          tdEl.append('<br />');
+          sim = parseInt(sim * 100, 10);
+          tdEl.append($('<span />').addClass('similarity')
+            .text(sim + '%' + ' ' + word.query[i]));
+        });
+
+
+        var similarity = Math.ceil(word.total_similarity * 100);
         var wordColor = getColor(word.query);
         wordColor.opacity = similarity / 100;
 
-        var tdEl = $('<td />');
-        tdEl.attr('data-word', 'cell-' + word.word);
         tdEl.css('background-color', wordColor);
-        tdEl.attr('data-color', wordColor);
-        tdEl.text(word.word);
-        tdEl.append('<br />');
-        tdEl.append($('<span />').addClass('similarity').text(similarity + '%'));
-        tdEl.attr('data-similar', word.query);
-        $thisTable.find('#year_' + year)
+        $thisTable.find('#year_' + year + '')
           .append(tdEl);
-
-
       });
     }
 
@@ -92,7 +96,7 @@
         'opacity': .9,
         'left': word.offset().left + (word.width() / 2) - 5 + 'px',
         'top': word.offset().top + (word.height() / 1.5) + 5 + 'px',
-        'background': bgColor  
+        'background': bgColor
       });
       $tooltip.html('<span>similar to ' + similarWord + '</span>');
     }
@@ -192,7 +196,7 @@
       .data(results)
       .enter()
       .append('text')
-        .style('font-size', function(d) { return parseInt(d.similarity * scaleFactor, 10) + 'px';})
+        .style('font-size', function(d) { return parseInt(d.total_similarity * scaleFactor, 10) + 'px';})
         .style('cursor', 'pointer')
         .attr('x', function(d) { return d.position.x * scaleFactor; })
         .attr('y', function(d) { return d.position.y * scaleFactor; })
@@ -205,8 +209,20 @@
             .duration(200)
             .style('opacity', .9)
             .style('background', getColor(d.query));
-          tooltip.html('<p>'+ d.year +'</p><p><strong>' + d.word + '</strong> is ' +parseInt(d.similarity * 100)+ '% similar to <strong>' + d.query + '</strong></p>')
+
+
+
+          var tips = [];
+          _.each(d.similarity, function(sim, i) {
+            tips.push(parseInt(sim * 100, 10)+ '% similar to <strong>' + d.query[i] + '</strong>');
+
+          });
+
+          tooltip
+            .html('<p><strong>'+ d.word + '</strong> from ' +
+              d.year + ' </p>' + tips.join("<br />"))
             .style('left', (d3.event.pageX) + 'px')
+            .style('font-size', '120%')
             .style('top', (d3.event.pageY) + 10 + 'px');
         })
         .on('mouseout', function(d) {
