@@ -46,28 +46,28 @@
 
     var dataByYear = _.groupBy(data, 'year');
     for (var year in dataByYear) {
-      var arrWords = _.sortBy(dataByYear[year], 'similarity').reverse();
+      var arrWords = _.sortBy(dataByYear[year], 'total_similarity').reverse();
       $thisTable.append('<tr class=\'flex-col\' id=\'year_' + year + '\'></tr>');
       $thisTable.find('#year_' +year).append('<th>' + year + '</th>');
       _.each(arrWords, function(word) {
         var tdEl = $('<td />');
         tdEl.text(word.word);
-        tdEl.attr('title', 'similar to ' + word.query);
+        // tdEl.attr('title', 'similar to ' + word.query);
         tdEl.attr('data-word', 'cell-' + word.word);
 
-        _.each(word.similarity, function(sim, i) {
-          tdEl.append('<br />');
-          sim = parseInt(sim * 100, 10);
-          tdEl.append($('<span />').addClass('similarity')
-            .text(sim + '%' + ' ' + word.query[i]));
-        });
-
+        tdEl.data({similarities: _.zip(word.query, word.similarity)});
 
         var similarity = Math.ceil(word.total_similarity * 100);
         var wordColor = getColor(word.query);
-        wordColor.opacity = similarity / 100;
 
+        tdEl.append('<br />');
+        tdEl.append($('<span />').addClass('similarity')
+          .text(similarity + '%'));
+
+        wordColor.opacity = similarity / 100;
+        tdEl.attr('data-color', wordColor);
         tdEl.css('background-color', wordColor);
+
         $thisTable.find('#year_' + year + '')
           .append(tdEl);
       });
@@ -86,9 +86,10 @@
   }
   function showTooltip(word) {
     // only need to show tooltips if comparing more than one word
-    var isQueryComparing = DATA.term.split(':').length > 1;
+    var isQueryComparing = DATA.term.split(':');
     if (isQueryComparing) {
-      var similarWord = word.attr('data-similar');
+      var wordData = word.data();
+      var similarWords = wordData.similarities;
       var arrColor = word.attr('data-color').split(',');
       var bgColor = 'rgb(' + arrColor[0].split('(')[1] + ',' + arrColor[1] + ',' + arrColor[2] + ')';
       var $tooltip = $('.tooltip');
@@ -98,7 +99,10 @@
         'top': word.offset().top + (word.height() / 1.5) + 5 + 'px',
         'background': bgColor
       });
-      $tooltip.html('<span>similar to ' + similarWord + '</span>');
+      $tooltip.empty();
+      _.each(similarWords, function(word) {
+        $tooltip.append(parseInt(word[1] * 100) + '%' + ' similar to <strong>' + word[0] + '</strong><br/>');
+      });
     }
   }
   function hideTooltip(word) {
@@ -222,7 +226,6 @@
             .html('<p><strong>'+ d.word + '</strong> from ' +
               d.year + ' </p>' + tips.join("<br />"))
             .style('left', (d3.event.pageX) + 'px')
-            .style('font-size', '120%')
             .style('top', (d3.event.pageY) + 10 + 'px');
         })
         .on('mouseout', function(d) {
