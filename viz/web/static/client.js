@@ -46,7 +46,7 @@
 
     var dataByYear = _.groupBy(data, 'year');
     for (var year in dataByYear) {
-      var arrWords = _.sortBy(dataByYear[year], 'total_similarity').reverse();
+      var arrWords = _.sortBy(dataByYear[year], 'sum_similarity').reverse();
       $thisTable.append('<tr class=\'flex-col\' id=\'year_' + year + '\'></tr>');
       $thisTable.find('#year_' +year).append('<th>' + year + '</th>');
       _.each(arrWords, function(word) {
@@ -57,12 +57,13 @@
 
         tdEl.data({similarities: _.zip(word.query, word.similarity)});
 
-        var similarity = Math.ceil(word.total_similarity * 100);
+        var similarity = Math.ceil(word.avg_similarity * 100);
         var wordColor = getColor(word.query);
 
+        var similarity_str = _.map(word.similarity, function(s) { return parseInt(s*100) + "%"; }).join(", ");
         tdEl.append('<br />');
         tdEl.append($('<span />').addClass('similarity')
-          .text(similarity + '%'));
+          .text(similarity_str));
 
         wordColor.opacity = similarity / 100;
         tdEl.attr('data-color', wordColor);
@@ -200,7 +201,7 @@
       .data(results)
       .enter()
       .append('text')
-        .style('font-size', function(d) { return parseInt(d.total_similarity * scaleFactor, 10) + 'px';})
+        .style('font-size', function(d) { return parseInt(d.avg_similarity * scaleFactor, 10) + 'px';})
         .style('cursor', 'pointer')
         .attr('x', function(d) { return d.position.x * scaleFactor; })
         .attr('y', function(d) { return d.position.y * scaleFactor; })

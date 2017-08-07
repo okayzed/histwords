@@ -101,7 +101,8 @@ def do_search(word1):
                 "query" : all_terms[word],
                 "year" : int(decade),
                 "similarity" : all_sims[word],
-                "total_similarity" : sum(all_sims[word]) / len(all_sims[word]),
+                "avg_similarity" : sum(all_sims[word]) / len(all_sims[word]),
+                "sum_similarity" : sum(all_sims[word]),
                 "position" : {
                     "x" : round(fitted[i][0], 3),
                     "y" : round(fitted[i][1], 3)
