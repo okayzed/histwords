@@ -76,6 +76,17 @@ def load_embeddings(filename="embeddings/eng-all_sgns"):
         EMBED_CACHE[filename] = embeddings
         return embeddings
 
+def get_embedding_list(dirname="embeddings"):
+    import stat
+    dirs = []
+    for f in os.listdir(dirname):
+        fname = os.path.join(dirname, f)
+
+        if os.path.isdir(fname):
+            dirs.append(fname)
+
+    return dirs
+
 def clear_figure():
     plt.figure(figsize=(20,20))
     plt.clf()
@@ -108,7 +119,7 @@ def plot_words(word1, words, fitted, cmap, sims):
     annotations = []
     isArray = type(word1) == list
     for i in xrange(len(words)):
-        pt = fitted[i] 
+        pt = fitted[i]
 
         ww,decade = [w.strip() for w in words[i].split("|")]
         color = cmap((int(decade) - 1840) / 10 + CMAP_MIN)
@@ -133,10 +144,12 @@ def plot_annotations(annotations):
     annotations.sort(key=lambda w: w[1], reverse=True)
     prev = annotations[0][-1]
     for ww, decade, ann in annotations[1:]:
-        plt.annotate('', xy=prev, xytext=ann, 
+        plt.annotate('', xy=prev, xytext=ann,
             arrowprops=dict(facecolor='blue', shrink=0.1, alpha=0.3,width=2, headwidth=15))
         print prev, ann
         prev = ann
 
 def savefig(name):
     plt.savefig(name, bbox_inches=0)
+
+print get_embedding_list()
