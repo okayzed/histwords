@@ -90,8 +90,14 @@ tr:nth-child(2n+1) {
 }
 td span.similarity {
   font-size: .75em;
+  line-height: 1.2em;
   font-weight: 200;
   color: rgba(0,0,0,.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  max-height: 1.2em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
 }
 td.compare {
   /*background: #DE96BD !important;*/
@@ -184,6 +190,16 @@ td.compare span.similarity {
 
 .tooltip p:first-child {
   border-bottom: 1px solid rgba(0,0,0,.25);
+}
+/* SVG */
+svg text {
+   -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
 }
 
 /* LOADING */

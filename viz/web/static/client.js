@@ -142,8 +142,6 @@
       getColor.colors[term] = scale[getColor.idx % scale.length];
       getColor.idx++;
     }
-
-
     return d3.color(getColor.colors[term]);
   }
 
@@ -173,8 +171,6 @@
       ann_lines[group] = ann_line;
     });
 
-
-
     var scaleFactor = 10;
 
     function getPos(min_or_max, x_or_y) {
@@ -187,16 +183,38 @@
     var maxX = getPos('max', 'x');
     var minY = getPos('min', 'y');
     var maxY = getPos('max', 'y');
+    var width = '100%';
+    var height = '100%';
 
     var tooltip = d3.select('.tooltip');
 
     var resultEl = d3.select('.results')
       .append('svg')
       .attr('viewBox', [minX - 25, minY - 25, maxX - minX + 50, maxY - minY + 50].join(' '))
-      .attr('width', '100%')
-      .attr('height', '100%');
+      .attr('width', width)
+      .attr('height', height);
 
-    resultEl
+    var width = d3.select('svg').attr('width');
+    var height = d3.select('svg').attr('height');
+
+    resultEl.append('rect')
+      .attr('width', width)
+      .attr('height', height)
+      .attr('x', minX - 25)
+      .attr('y', minY - 25)
+      .style('fill', 'none')
+      .style('pointer-events', 'all')
+      .call(d3.zoom()
+        .scaleExtent([1, 5])
+        .on("zoom", zoomed));
+
+    function zoomed() {
+      g.attr("transform", d3.event.transform);
+    }
+
+    var g = resultEl.append('g');
+
+    g
       .selectAll('text.term')
       .data(results)
       .enter()
@@ -215,12 +233,9 @@
             .style('opacity', .9)
             .style('background', getColor(d.query));
 
-
-
           var tips = [];
           _.each(d.similarity, function(sim, i) {
             tips.push(parseInt(sim * 100, 10)+ '% similar to <strong>' + d.query[i] + '</strong>');
-
           });
 
           tooltip
@@ -237,7 +252,7 @@
         });
 
     _.each(ann_lines, function(ann_line, group) {
-      resultEl
+      g
         .selectAll('line.annotation')
         .data(ann_line)
         .enter()
@@ -253,7 +268,7 @@
             .text(group);
     });
 
-    resultEl
+    g
       .selectAll('text.annotation')
       .data(annotations)
       .enter()
@@ -263,7 +278,6 @@
         .attr('x', function(d) { return d.position.x * scaleFactor + 1; })
         .attr('y', function(d) { return d.position.y * scaleFactor + 1; })
         .text(function(d) { return d.year; });
-
   }
 
   // }}}
