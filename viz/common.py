@@ -70,6 +70,8 @@ def load_embeddings(filename="embeddings/eng-all_sgns"):
         if filename in EMBED_CACHE:
             return EMBED_CACHE[filename]
 
+        print "THIS MIGHT TAKE A WHILE..."
+
         embeddings = SequentialEmbedding.load(filename, range(1840, 2000, 10))
         print "LOAD EMBEDDINGS TOOK %s" % (time.time() - start)
 
@@ -86,6 +88,27 @@ def get_embedding_list(dirname="embeddings"):
             dirs.append(fname)
 
     return dirs
+
+def select_embedding():
+    print ""
+    print "Please select an embedding to load"
+    embeddings = get_embedding_list()
+    for i, embed in enumerate(embeddings):
+        print "%s) %s" % (i+1, embed)
+
+    while True:
+        selection = raw_input("Load which embedding? ")
+        try:
+            select_num = int(selection)
+            embedding = embeddings[select_num-1]
+            break
+        except:
+            print "Please select a number between %s and %s" % (1, len(embeddings))
+
+    print ""
+
+    return load_embeddings(embedding)
+
 
 def clear_figure():
     plt.figure(figsize=(20,20))
@@ -158,3 +181,4 @@ def savefig(name):
     fname = os.path.join(directory, name)
 
     plt.savefig(fname, bbox_inches=0)
+

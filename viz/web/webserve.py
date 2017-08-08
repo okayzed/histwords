@@ -66,7 +66,11 @@ def restart():
 def main():
     t = start()
     import helpers
-    helpers.load_embeddings()
+
+    # TODO: add argument parsing with argparse
+
+    helpers.select_embedding()
+
 
     while True:
         t.join(0.5)

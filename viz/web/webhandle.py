@@ -145,12 +145,6 @@ def do_get(handler):
                 ret = do_search(term)
             msg_dict.update(ret)
 
-        if cmd == "get_embeddings":
-            msg_dict["embeddings"] = helpers.get_embedding_list()
-
-        if cmd == "status":
-            msg_dict["embedding"] = helpers.get_embedding()
-
         write_response(handler, 200, ['Content-type: text/json'], json.dumps(msg_dict))
 
 
@@ -164,12 +158,7 @@ def do_post(handler):
 
     if parts.path == '/r/':
         cmd = get_value(query, "cmd")
-        if cmd == "load_embedding":
-            embedding = get_value(query, "embedding")
-            helpers.load_embeddings(embedding)
 
-        if cmd == "clear_embeddings":
-            helpers.clear_embed_cache()
     else:
         debug("UNKNOWN URL", parts.path)
 
