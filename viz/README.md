@@ -3,7 +3,9 @@ This dir contains code and scripts for visualizing the histwords embeddings.
 # png images
 
 the scripts/ dir has files for generating .png graphics. running `python
-scripts/closest_over_time_with_anns.py awful` will generate a file in output/
+scripts/closest_over_time_with_anns.py awful` will generate a file in viz/output/
+
+NOTE: if you are using Mac OS, try out 'pythonw' if python does not work for you
 
 # web explorer
 

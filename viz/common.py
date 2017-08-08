@@ -7,8 +7,8 @@ import time
 tpath = os.path.dirname(os.path.realpath(__file__))
 VIZ_DIR=os.path.join(tpath, "web")
 
-tpath = os.path.abspath(os.path.join(tpath, "../"))
 ROOT_DIR=tpath
+tpath = os.path.abspath(os.path.join(tpath, "../"))
 
 sys.path.append(tpath)
 os.chdir(tpath)
@@ -150,6 +150,11 @@ def plot_annotations(annotations):
         prev = ann
 
 def savefig(name):
-    plt.savefig(name, bbox_inches=0)
 
-print get_embedding_list()
+    directory = os.path.join(ROOT_DIR, "output")
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    fname = os.path.join(directory, name)
+
+    plt.savefig(fname, bbox_inches=0)
