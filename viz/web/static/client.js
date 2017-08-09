@@ -159,7 +159,7 @@
     decadeSelector.css("margin-right", "20px");
 
 
-    var decadeText = $("<span />");
+    var decadeText = $("<div />");
     var decades = {};
 
     _.each(data.results, function(d) {
@@ -196,8 +196,8 @@
     });
 
     var decadeWrapper = $("<div class='controls noselect' />");
-    decadeWrapper.append(decadeSelector);
     decadeWrapper.append(decadeText);
+    decadeWrapper.append(decadeSelector);
     decadeSelector.trigger("input");
 
     return decadeWrapper;
