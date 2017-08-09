@@ -148,8 +148,68 @@
   getColor.colors = {}
   getColor.idx = 0;
 
+
+  function makeCloudControls(data) {
+    if (!data || !data.results) {
+      return;
+    }
+
+    var decadeSelector = $("<input type='range' />");
+    decadeSelector.css("width", "600px");
+    decadeSelector.css("margin-right", "20px");
+
+
+    var decadeText = $("<span />");
+    var decades = {};
+
+    _.each(data.results, function(d) {
+      decades[d.year] = d.year;
+    });
+
+    decades = _.keys(decades);
+
+
+    decadeSelector.attr("min", 0);
+    decadeSelector.attr("max", decades.length);
+
+
+    decadeSelector.on('input', function(year) {
+      var idx = decadeSelector.val();
+
+      var year;
+      if (idx == decades.length) {
+        year = "all";
+        decadeText.text("Selected all years, drag slider to change");
+      } else {
+        year = decades[idx];
+        decadeText.text("Selected " + year);
+      }
+
+      $("svg text.term").each(function() {
+        if ($(this).attr("data-year") == year || year == "all") {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+
+      });
+    });
+
+    var decadeWrapper = $("<div class='controls noselect' />");
+    decadeWrapper.append(decadeSelector);
+    decadeWrapper.append(decadeText);
+    decadeSelector.trigger("input");
+
+    return decadeWrapper;
+
+
+  }
+
   function makeCloudView(data, res) {
     $('.results').empty();
+
+    var controls = makeCloudControls(data);
+    $(".results").append(controls);
 
     var results = _.filter(data.results, function(d) { return !d.query.includes(d.word) ; } );
     var annotations = _.filter(data.results, function(d) { return d.query.includes(d.word) ; } );
@@ -223,8 +283,10 @@
         .style('cursor', 'pointer')
         .attr('x', function(d) { return d.position.x * scaleFactor; })
         .attr('y', function(d) { return d.position.y * scaleFactor; })
+        .attr('data-year', function(d) { return d.year })
         .attr('fill', function(d) { return getColor(d.query); })
-        .style('opacity', function(d) { return Math.max(0.1, (d.year - 1800) / 200); })
+        .attr('class', 'term')
+        .style('opacity', function(d) { return Math.max(0.1, (d.year - 1700) / 300); })
         .text(function(d) { return d.word; })
         .on('mouseover', function(d) {
           // add tooltip

@@ -1,3 +1,15 @@
+/* NO HIGHLIGHTING */
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                        supported by Chrome and Opera */
+}
+
 /* SCROLLBAR RESET */
 ::-webkit-scrollbar {
   width: 12px;
@@ -161,6 +173,11 @@ td.compare span.similarity {
   text-align: center;
 }
 
+.controls {
+  padding: 20px;
+  background-color: #eee;
+}
+
 /* TOOLTIP */
 
 .tooltip {
@@ -238,3 +255,4 @@ svg text {
     -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
   }
 }
+
