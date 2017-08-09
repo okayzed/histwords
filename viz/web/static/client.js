@@ -155,11 +155,11 @@
     }
 
     var decadeSelector = $("<input type='range' step=0.1 />");
-    decadeSelector.css("width", "600px");
+    decadeSelector.css("width", "200px");
     decadeSelector.css("margin-right", "20px");
 
 
-    var decadeText = $("<div />");
+    var decadeText = $("<span />");
     var decades = {};
 
     _.each(data.results, function(d) {

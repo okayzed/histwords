@@ -175,7 +175,8 @@ td.compare span.similarity {
 
 .controls {
   padding: 20px;
-  background-color: #eee;
+  position: fixed;
+  bottom: 20px;
 }
 
 /* TOOLTIP */
