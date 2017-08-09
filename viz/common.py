@@ -62,7 +62,12 @@ def clear_embed_cache():
 
 import threading
 embed_lock = threading.Lock()
-def load_embeddings(filename="embeddings/eng-all_sgns"):
+
+EMBEDDING="embeddings/eng-all_sgns"
+def load_embeddings(filename=None):
+    if not filename:
+        filename = EMBEDDING
+
     with embed_lock:
         print "LOADING EMBEDDINGS %s" % filename
         start = time.time()
@@ -90,6 +95,7 @@ def get_embedding_list(dirname="embeddings"):
     return dirs
 
 def select_embedding():
+    global EMBEDDING
     print ""
     print "Please select an embedding to load"
     embeddings = get_embedding_list()
@@ -106,6 +112,7 @@ def select_embedding():
             print "Please select a number between %s and %s" % (1, len(embeddings))
 
     print ""
+    EMBEDDING = embedding
 
     return load_embeddings(embedding)
 

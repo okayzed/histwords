@@ -154,7 +154,7 @@
       return;
     }
 
-    var decadeSelector = $("<input type='range' />");
+    var decadeSelector = $("<input type='range' step=0.1 />");
     decadeSelector.css("width", "600px");
     decadeSelector.css("margin-right", "20px");
 
@@ -174,7 +174,7 @@
 
 
     decadeSelector.on('input', function(year) {
-      var idx = decadeSelector.val();
+      var idx = parseInt(decadeSelector.val());
 
       var year;
       if (idx == decades.length) {
