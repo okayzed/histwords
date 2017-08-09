@@ -159,7 +159,7 @@
     decadeSelector.css("margin-right", "20px");
 
 
-    var decadeText = $("<span />");
+    var decadeText = $("<div />");
     var decades = {};
 
     _.each(data.results, function(d) {
