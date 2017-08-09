@@ -161,43 +161,58 @@
 
     var decadeText = $("<div />");
     var decades = {};
+    var latest = {};
 
     _.each(data.results, function(d) {
       decades[d.year] = d.year;
+
+      latest[d.word] = Math.max(d.year, latest[d.word]||0);
     });
+
 
     decades = _.keys(decades);
 
 
     decadeSelector.attr("min", 0);
-    decadeSelector.attr("max", decades.length);
+    decadeSelector.attr("max", decades.length+1);
 
 
-    decadeSelector.on('input', function(year) {
+    function handleDecadeSelector(year) {
       var idx = parseInt(decadeSelector.val());
 
       var year;
       if (idx == decades.length) {
         year = "all";
         decadeText.text("Selected all years, drag slider to change");
+      } else if (idx == decades.length + 1) {
+        year = "recent";
+        decadeText.text("Selected most recent context for each word, drag slider to change");
       } else {
         year = decades[idx];
         decadeText.text("Selected " + year);
+
       }
 
       $("svg text.term").each(function() {
-        if ($(this).attr("data-year") == year || year == "all") {
+        var this_year = $(this).attr("data-year")
+        var this_term = $(this).text();
+        if (year == "recent" && this_year == latest[this_term]) {
+          $(this).show();
+        } else if (this_year == year || year == "all") {
           $(this).show();
         } else {
           $(this).hide();
         }
 
       });
-    });
+    }
+    decadeSelector.on('input', handleDecadeSelector);
+    $(window).on("cloudview.refresh", function() { handleDecadeSelector(decades.length+1); });
 
     var decadeWrapper = $("<div class='controls noselect' />");
     decadeWrapper.append(decadeText);
     decadeWrapper.append(decadeSelector);
+    decadeSelector.val(decades.length+1);
     decadeSelector.trigger("input");
 
     return decadeWrapper;
@@ -206,6 +221,9 @@
   }
 
   function makeCloudView(data, res) {
+    if (!data || !data.results) {
+      return;
+    }
     $('.results').empty();
 
     var controls = makeCloudControls(data);
@@ -340,6 +358,8 @@
         .attr('x', function(d) { return d.position.x * scaleFactor + 1; })
         .attr('y', function(d) { return d.position.y * scaleFactor + 1; })
         .text(function(d) { return d.year; });
+
+    $(window).trigger("cloudview.refresh");
   }
 
   // }}}
@@ -479,7 +499,6 @@
     $('.header .inputbox').on('keydown', handleKeyDown);
     viewtabBoxEl = $('.viewtab_box');
     _.each(VIZ, function(func, viz) {
-      console.log('VIZ', viz);
       var el = $('<div class=\"viewtab\"/>');
       el.text(viz)
         .data('viz', viz);
