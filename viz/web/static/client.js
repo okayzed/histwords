@@ -205,7 +205,7 @@
       .style('fill', 'none')
       .style('pointer-events', 'all')
       .call(d3.zoom()
-        .scaleExtent([1, 5])
+        .scaleExtent([0.25, 5])
         .on("zoom", zoomed));
 
     function zoomed() {
