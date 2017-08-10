@@ -188,11 +188,13 @@ td.compare span.similarity {
     -ms-transition: all, .2s;
     -o-transition: all, .2s;
   position: absolute;
+  color: #111;
   text-aign: center;
   font-size: 14px;
+  line-height: 1.75em;
   width: inherit;
-  padding: 5px;
-  background: lightsteelblue;
+  padding: 5px 10px;
+  background: #eee;
   pointer-events:none;
   border-radius: 5px;
     -webkit-border-radius: 5px;
@@ -202,7 +204,7 @@ td.compare span.similarity {
 }
 
 .tooltip p {
-  line-height: 1.2em;
+  line-height: 1.75em;
   margin: 0;
 }
 

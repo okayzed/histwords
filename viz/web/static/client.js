@@ -8,8 +8,6 @@
     $('.results').append(
       $('<pre />').text(JSON.stringify(data, null, 2))
     );
-
-
   }
   // }}}
 
@@ -137,6 +135,7 @@
 
   // {{{ word cloud plot
   var scale = d3.schemeCategory20;
+
   function getColor(term) {
     if (getColor.colors[term] == null) {
       getColor.colors[term] = scale[getColor.idx % scale.length];
@@ -216,8 +215,97 @@
     decadeSelector.trigger("input");
 
     return decadeWrapper;
+  }
 
+  function makeLineView(data, res) {
+    $('.results').empty();
 
+    var words = prepData(data);
+    var [years, sim] = getYearsAndSim(words);
+    // console.log('words', words);
+
+    var margin = {top: 50, right: 50, bottom: 50, left: 50};
+    var width = $('.results').width() - margin.left - margin.right;
+    var height = window.innerHeight - $('.header').height() - margin.top - margin.bottom;
+
+    var xScale = d3.scaleLinear().rangeRound([0, width]);
+    var yScale = d3.scaleLinear().rangeRound([height, 0]);
+
+    var resultEl = d3.select('.results')
+      .append('svg')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom);
+
+    var g = resultEl.append('g')
+      .attr('transform', 'translate(' + margin.left + ',0)');
+
+    var valueLine = d3.line()
+      .x(function(d) { return xScale(d.year); })
+      .y(function(d) { return yScale(d.avg_similarity) ; });
+
+    // Scale the range of the data
+    xScale.domain(d3.extent(years));
+    yScale.domain(d3.extent(sim));
+
+    function prepData(data) {
+      var words = [];
+      _.each(_.groupBy(data.results, 'word'), function(word) {
+        var wordGroup = [];
+        _.each(word, function(el) {
+          var terms = _.object(_.pick(el,'query').query, _.pick(el,'similarity').similarity);
+          var wordYear = _.pick(el, 'word', 'year', 'avg_similarity');
+          wordGroup.push(_.extend(wordYear, { terms : terms }));
+        });
+        words.push(wordGroup);
+      });
+      return words;
+    }
+
+    function getYearsAndSim(words) {
+      var years = [];
+      var sim = [];
+      _.each(words, function(word) {
+        years = _.union(years, _.pluck(word, 'year'));
+        sim = _.pluck(word, 'avg_similarity')[0] < 0.98 ? _.union(sim, _.pluck(word, 'avg_similarity')) : sim;
+      });
+      return [years.sort(), sim.sort()];
+    }
+    function drawLines(words) {
+      _.each(words, function(word) {
+        draw(_.sortBy(word, 'year'), word[0].word);
+      });
+    }
+
+    function draw(data, word) {
+      var xAxis = d3.axisBottom(xScale).tickFormat(d3.format('d'));
+      var yAxis = d3.axisLeft(yScale).tickFormat(d3.format('.0%'));
+      // Add the X Axis
+      resultEl.append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + height + ')')
+          .call(xAxis);
+
+      // Add the Y Axis
+      resultEl.append('g')
+        .attr('transform', 'translate(' + margin.left + ', 0)')
+        .call(yAxis);
+
+      g.append('path')
+        .data([data])
+        .attr('class', 'line')
+        .attr('fill', 'none')
+        .attr('stroke', getColor(word))
+        .attr('stroke-width', 1.5)
+        .attr('stroke-linejoin', 'round')
+        .attr('d', valueLine);
+      g.append('text')
+        .data([data])
+        .attr('x', function(d) { return xScale(d[0].year); })
+        .attr('y', function(d) { return yScale(d[0].avg_similarity); })
+        .attr('fill', getColor(word))
+        .text(function(d) { return d[0].word });
+    }
+
+    drawLines(words);
   }
 
   function makeCloudView(data, res) {
@@ -227,7 +315,7 @@
     $('.results').empty();
 
     var controls = makeCloudControls(data);
-    $(".results").append(controls);
+    $('.results').append(controls);
 
     var results = _.filter(data.results, function(d) { return !d.query.includes(d.word) ; } );
     var annotations = _.filter(data.results, function(d) { return d.query.includes(d.word) ; } );
@@ -271,9 +359,6 @@
       .attr('viewBox', [minX - 25, minY - 25, maxX - minX + 50, maxY - minY + 50].join(' '))
       .attr('width', width)
       .attr('height', height);
-
-    var width = d3.select('svg').attr('width');
-    var height = d3.select('svg').attr('height');
 
     resultEl.append('rect')
       .attr('width', width)
@@ -320,7 +405,7 @@
 
           tooltip
             .html('<p><strong>'+ d.word + '</strong> from ' +
-              d.year + ' </p>' + tips.join("<br />"))
+              d.year + ' </p><p>' + tips.join('<br />' + '</p>'))
             .style('left', (d3.event.pageX) + 'px')
             .style('top', (d3.event.pageY) + 10 + 'px');
         })
@@ -417,6 +502,7 @@
   var VIZ = {
     'table' : makeTableView,
     'cloud' : makeCloudView,
+    'line' : makeLineView,
     'json' : makeJsonView
   };
 
