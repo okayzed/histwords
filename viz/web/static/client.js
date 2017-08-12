@@ -17,11 +17,11 @@
     // highlight words on hover
     $('table#matrix_by_year').find('td').on('mouseenter', function() {
       highlightDrift($(this).attr('data-word'), 'compare');
-      showTooltip($(this));
+      showTooltipInTable($(this));
     });
     $('table#matrix_by_year').find('td').on('mouseleave', function() {
       unhighlightDrift($(this).attr('data-word'), 'compare');
-      hideTooltip($(this));
+      hideTooltipInTable($(this));
     });
     // freeze highlight on click
     $('table#matrix_by_year').find('td').on('click', function() {
@@ -83,7 +83,7 @@
   function unhighlightDrift(word, wordClass) {
     $('table#matrix_by_year').find('td[data-word=\"' + word + '\"]').removeClass(wordClass);
   }
-  function showTooltip(word) {
+  function showTooltipInTable(word) {
     // only need to show tooltips if comparing more than one word
     var isQueryComparing = DATA.term.split(':');
     if (isQueryComparing) {
@@ -104,7 +104,7 @@
       });
     }
   }
-  function hideTooltip(word) {
+  function hideTooltipInTable(word) {
     var $tooltip = $('.tooltip');
     $tooltip.css({opacity: 0});
   }
@@ -216,17 +216,40 @@
 
     return decadeWrapper;
   }
+  function addTooltip(tooltip, d) {
+    tooltip.transition()
+      .duration(200)
+      .style('opacity', .9)
+      .style('background', getColor(d.query));
 
+    var tips = [];
+    _.each(d.similarity, function(sim, i) {
+      tips.push(parseInt(sim * 100, 10)+ '% similar to <strong>' + d.query[i] + '</strong>');
+    });
+
+    tooltip
+      .html('<p><strong>'+ d.word + '</strong> in ' +
+        d.year + ' </p><p>' + tips.join('<br />' + '</p>'))
+      .style('left', (d3.event.pageX) + 'px')
+      .style('top', (d3.event.pageY) + 10 + 'px');
+  }
+
+  function removeTooltip(tooltip) {
+    tooltip.transition()
+      .duration(200)
+      .style('opacity', 0);
+  }
   function makeLineView(data, res) {
     $('.results').empty();
 
-    var words = prepData(data);
-    var [years, sim] = getYearsAndSim(words);
+    var [words, yearRange] = prepData(data);
+
     // console.log('words', words);
 
     var margin = {top: 50, right: 50, bottom: 50, left: 50};
     var width = $('.results').width() - margin.left - margin.right;
-    var height = window.innerHeight - $('.header').height() - margin.top - margin.bottom;
+    // var height = window.innerHeight - $('.header').height() - margin.top - margin.bottom;
+    var height = (words.length * 30) + margin.top ;
 
     var xScale = d3.scaleLinear().rangeRound([0, width]);
     var yScale = d3.scaleLinear().rangeRound([height, 0]);
@@ -237,39 +260,57 @@
       .attr('height', height + margin.top + margin.bottom);
 
     var g = resultEl.append('g')
-      .attr('transform', 'translate(' + margin.left + ',0)');
+      .attr('transform', 'translate(' + margin.left + ',50)');
 
     var valueLine = d3.line()
       .x(function(d) { return xScale(d.year); })
-      .y(function(d) { return yScale(d.avg_similarity) ; });
+      .y(function(d) { return yScale(d.word_index) ; });
 
     // Scale the range of the data
-    xScale.domain(d3.extent(years));
-    yScale.domain(d3.extent(sim));
+    xScale.domain(d3.extent(yearRange));
+    yScale.domain([0, words.length]);
+    function sortWordsByDateAppearedAndDuration(a, b) {
+      // each word is an array of objects containing a decade
+      a = _.sortBy(a, 'year');
+      b = _.sortBy(b, 'year');
+      if (a[0].year === b[0].year) {
+        // sort by how many decades
+        return a[a.length-1].year > b[b.length-1].year ? 1 : -1;
+      } else {
+        // sort by when the word first appeared
+        return a[0].year > b[0].year ? -1 : 1;
+      }
+    }
 
     function prepData(data) {
       var words = [];
+      var yearRange = [];
+
       _.each(_.groupBy(data.results, 'word'), function(word) {
         var wordGroup = [];
         _.each(word, function(el) {
           var terms = _.object(_.pick(el,'query').query, _.pick(el,'similarity').similarity);
-          var wordYear = _.pick(el, 'word', 'year', 'avg_similarity');
+          var wordYear = _.pick(el, 'word', 'year', 'avg_similarity', 'query', 'similarity');
+          yearRange = _.union(yearRange, [wordYear.year]);
           wordGroup.push(_.extend(wordYear, { terms : terms }));
         });
         words.push(wordGroup);
       });
-      return words;
+
+      words.sort(sortWordsByDateAppearedAndDuration);
+
+      _.each(words, function(word, index) {
+        _.each(word, function(el) {
+          el.word_index = index + 1;
+        });
+      });
+
+      yearRange.sort();
+      yearRange.push(yearRange[yearRange.length - 1] + 10);
+
+      return [words, yearRange];
     }
 
-    function getYearsAndSim(words) {
-      var years = [];
-      var sim = [];
-      _.each(words, function(word) {
-        years = _.union(years, _.pluck(word, 'year'));
-        sim = _.pluck(word, 'avg_similarity')[0] < 0.98 ? _.union(sim, _.pluck(word, 'avg_similarity')) : sim;
-      });
-      return [years.sort(), sim.sort()];
-    }
     function drawLines(words) {
       _.each(words, function(word) {
         draw(_.sortBy(word, 'year'), word[0].word);
@@ -277,37 +318,57 @@
     }
 
     function draw(data, word) {
+      // console.log(word, data);
       var xAxis = d3.axisBottom(xScale).tickFormat(d3.format('d'));
-      var yAxis = d3.axisLeft(yScale).tickFormat(d3.format('.0%'));
+      var fullHeight = height + margin.top;
+      var tooltip = d3.select('.tooltip');
+
       // Add the X Axis
       resultEl.append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + height + ')')
-          .call(xAxis);
-
-      // Add the Y Axis
+        .attr('transform', 'translate(' + margin.left + ',' + fullHeight + ')')
+        .call(xAxis);
+      // Add another X Axis
       resultEl.append('g')
-        .attr('transform', 'translate(' + margin.left + ', 0)')
-        .call(yAxis);
+        .attr('transform', `translate(${margin.left}, 0)`)
+        .call(xAxis);
 
       g.append('path')
         .data([data])
-        .attr('class', 'line')
+        .attr('data-word', word)
         .attr('fill', 'none')
-        .attr('stroke', getColor(word))
-        .attr('stroke-width', 1.5)
+        .attr('stroke', getZebraStripe(data[0].word_index))
+        .attr('stroke-width', 1)
         .attr('stroke-linejoin', 'round')
         .attr('d', valueLine);
+      // add circles
+      _.each(data, function(wordObj) {
+          g.append('circle')
+            .data([wordObj])
+            .attr('fill', getColor(wordObj.query))
+            .attr('cx', function(d) { return xScale(d.year); })
+            .attr('cy', function(d) { return yScale(d.word_index); })
+            .attr('r', function(d) { return 10 * d.avg_similarity + 1 })
+            .on('mouseover', function(d) {
+              addTooltip(tooltip, d);
+            })
+            .on('mouseout', function() {
+              removeTooltip(tooltip);
+            });
+      });
       g.append('text')
         .data([data])
+        .attr('data-word', word)
         .attr('x', function(d) { return xScale(d[0].year); })
-        .attr('y', function(d) { return yScale(d[0].avg_similarity); })
-        .attr('fill', getColor(word))
+        .attr('y', function(d) { return yScale(d[0].word_index) - 5; })
+        .attr('fill', getZebraStripe(data[0].word_index))
         .text(function(d) { return d[0].word });
     }
 
     drawLines(words);
   }
-
+  function getZebraStripe(index) {
+    return index % 2 === 0 ? '#666666' : '#aaaaaa';
+  }
   function makeCloudView(data, res) {
     if (!data || !data.results) {
       return;
@@ -392,28 +453,10 @@
         .style('opacity', function(d) { return Math.max(0.1, (d.year - 1700) / 300); })
         .text(function(d) { return d.word; })
         .on('mouseover', function(d) {
-          // add tooltip
-          tooltip.transition()
-            .duration(200)
-            .style('opacity', .9)
-            .style('background', getColor(d.query));
-
-          var tips = [];
-          _.each(d.similarity, function(sim, i) {
-            tips.push(parseInt(sim * 100, 10)+ '% similar to <strong>' + d.query[i] + '</strong>');
-          });
-
-          tooltip
-            .html('<p><strong>'+ d.word + '</strong> from ' +
-              d.year + ' </p><p>' + tips.join('<br />' + '</p>'))
-            .style('left', (d3.event.pageX) + 'px')
-            .style('top', (d3.event.pageY) + 10 + 'px');
+          addTooltip(tooltip, d);
         })
         .on('mouseout', function(d) {
-          // remove tooltip
-          tooltip.transition()
-            .duration(200)
-            .style('opacity', 0);
+          removeTooltip(tooltip);
         });
 
     _.each(ann_lines, function(ann_line, group) {
@@ -502,7 +545,7 @@
   var VIZ = {
     'table' : makeTableView,
     'cloud' : makeCloudView,
-    'line' : makeLineView,
+    'timeline' : makeLineView,
     'json' : makeJsonView
   };
 
