@@ -274,6 +274,11 @@
       a = _.sortBy(a, 'year');
       b = _.sortBy(b, 'year');
       if (a[0].year === b[0].year) {
+        if (a[a.length-1].year == b[b.length-1].year) {
+          // sort by similarity
+          return a[0].total_similarity > b[0].total_similarity;
+        }
+
         // sort by how many decades
         return a[a.length-1].year > b[b.length-1].year ? 1 : -1;
       } else {
