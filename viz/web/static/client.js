@@ -247,7 +247,7 @@
     // console.log('words', words);
 
     var margin = {top: 50, right: 50, bottom: 50, left: 50};
-    var width = $('.results').width() - margin.left - margin.right;
+    var width = $('.results').width() - margin.left - margin.right - 20;
     // var height = window.innerHeight - $('.header').height() - margin.top - margin.bottom;
     var height = (words.length * 30) + margin.top ;
 
@@ -276,7 +276,7 @@
       if (a[0].year === b[0].year) {
         if (a[a.length-1].year == b[b.length-1].year) {
           // sort by similarity
-          return a[0].total_similarity > b[0].total_similarity;
+          return a[0].sum_similarity > b[0].sum_similarity;
         }
 
         // sort by how many decades
